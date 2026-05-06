@@ -228,26 +228,29 @@
     ];
 
     function render(item) {
-      document.getElementById("eyebrow").textContent = "Daily Conor";
-      document.getElementById("title").textContent = item.title;
-      document.getElementById("description").textContent = item.description;
-      document.getElementById("meta").textContent =
-        `${item.category} · Source: ${item.source} · Added: ${item.dateAdded}`;
+  document.getElementById("eyebrow").textContent = "Daily Conor";
+  document.getElementById("title").textContent = item.title;
+  document.getElementById("description").textContent = item.description;
+  document.getElementById("meta").textContent =
+    `${item.category} · Source: ${item.source} · Added: ${item.dateAdded}`;
 
-      document.getElementById("results").classList.add("hidden");
-      document.getElementById("backButton").classList.add("hidden");
-      document.getElementById("randomButton").classList.remove("hidden");
+  const results = document.getElementById("results");
+  results.classList.add("hidden");
+  results.innerHTML = "";
 
-      const linkButton = document.getElementById("link");
-      if (item.url) {
-        linkButton.href = item.url;
-        linkButton.classList.remove("hidden");
-      } else {
-        linkButton.classList.add("hidden");
-      }
+  document.getElementById("backButton").classList.add("hidden");
+  document.getElementById("randomButton").classList.remove("hidden");
 
-      renderTags(item.tags);
-    }
+  const linkButton = document.getElementById("link");
+  if (item.url) {
+    linkButton.href = item.url;
+    linkButton.classList.remove("hidden");
+  } else {
+    linkButton.classList.add("hidden");
+  }
+
+  renderTags(item.tags);
+}
 
     function renderTags(tags) {
       const tagsContainer = document.getElementById("tags");
