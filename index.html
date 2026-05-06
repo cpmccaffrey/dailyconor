@@ -31,12 +31,14 @@
       color: #666;
       font-size: 14px;
       margin-bottom: 20px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
     }
 
     h1 {
-      font-size: 48px;
+      font-size: 46px;
       margin: 0 0 20px 0;
-      line-height: 1.05;
+      line-height: 1.1;
       letter-spacing: -1px;
     }
 
@@ -45,6 +47,7 @@
       line-height: 1.7;
       font-size: 18px;
       margin-bottom: 24px;
+      white-space: pre-wrap;
     }
 
     .meta {
@@ -68,6 +71,11 @@
       font-size: 13px;
       color: #555;
       background: #fafafa;
+      cursor: pointer;
+    }
+
+    .tag:hover {
+      background: #f0f0f0;
     }
 
     .button {
@@ -88,6 +96,41 @@
       background: white;
       color: #111;
       border: 1px solid #ccc;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    .result-list {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      margin-top: 24px;
+    }
+
+    .result {
+      border: 1px solid #e5e5e5;
+      border-radius: 18px;
+      padding: 20px;
+      background: #fafafa;
+    }
+
+    .result-title {
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .result-description {
+      color: #555;
+      line-height: 1.6;
+      margin-bottom: 12px;
+    }
+
+    .result-link {
+      color: #111;
+      font-weight: 600;
     }
 
     @media (max-width: 700px) {
@@ -117,9 +160,15 @@
       Open Link
     </a>
 
-    <button class="button secondary" onclick="showAnother()">
+    <button class="button secondary" id="randomButton" onclick="showAnother()">
       Show me another
     </button>
+
+    <button class="button secondary hidden" id="backButton" onclick="showAnother()">
+      Back to random
+    </button>
+
+    <div id="results" class="result-list hidden"></div>
   </div>
 
   <script>
@@ -143,23 +192,72 @@
           "Nobel Prize-winning physicist known for deep intuition, playful thinking, and unusually clear explanations of complex ideas.",
         source: "Conor",
         dateAdded: "May 6, 2026"
+      },
+      {
+        title: "Coming back to where you started",
+        category: "Quotes",
+        tags: ["perspective", "growth", "wisdom"],
+        description:
+`“Why do you go away? So that you can come back. So that you can see the place you came from with new eyes and extra colors. And the people there see you differently, too. Coming back to where you started is not the same as never leaving.”
+
+— Terry Pratchett`,
+        source: "Conor",
+        dateAdded: "May 6, 2026"
+      },
+      {
+        title: "Paradise on earth",
+        category: "Quotes",
+        tags: ["work", "friendship", "life", "conversation"],
+        description:
+`“An old friend of mine, a journalist, once said that paradise on earth was to work all day alone in anticipation of an evening in interesting company.”
+
+— Ian McEwan`,
+        source: "Conor",
+        dateAdded: "May 6, 2026"
+      },
+      {
+        title: "How to Run Meetings That Don't Suck",
+        url: "https://creatoreconomy.so/p/how-to-run-meetings-that-dont-suck",
+        category: "Writing",
+        tags: ["meetings", "leadership", "communication", "management"],
+        description:
+          "Practical thinking on how to make meetings more useful, efficient, and less draining.",
+        source: "Conor",
+        dateAdded: "May 6, 2026"
       }
     ];
 
     function render(item) {
+      document.getElementById("eyebrow").textContent = "Daily Conor";
       document.getElementById("title").textContent = item.title;
       document.getElementById("description").textContent = item.description;
       document.getElementById("meta").textContent =
         `${item.category} · Source: ${item.source} · Added: ${item.dateAdded}`;
-      document.getElementById("link").href = item.url;
 
+      document.getElementById("results").classList.add("hidden");
+      document.getElementById("backButton").classList.add("hidden");
+      document.getElementById("randomButton").classList.remove("hidden");
+
+      const linkButton = document.getElementById("link");
+      if (item.url) {
+        linkButton.href = item.url;
+        linkButton.classList.remove("hidden");
+      } else {
+        linkButton.classList.add("hidden");
+      }
+
+      renderTags(item.tags);
+    }
+
+    function renderTags(tags) {
       const tagsContainer = document.getElementById("tags");
       tagsContainer.innerHTML = "";
 
-      item.tags.forEach(tag => {
+      tags.forEach(tag => {
         const span = document.createElement("span");
         span.className = "tag";
-        span.textContent = tag;
+        span.textContent = "#" + tag;
+        span.onclick = () => showTagResults(tag);
         tagsContainer.appendChild(span);
       });
     }
@@ -167,6 +265,56 @@
     function showAnother() {
       const item = coolThings[Math.floor(Math.random() * coolThings.length)];
       render(item);
+    }
+
+    function showTagResults(tag) {
+      const matches = coolThings.filter(item => item.tags.includes(tag));
+
+      document.getElementById("eyebrow").textContent = "Daily Conor · Hashtag";
+      document.getElementById("title").textContent = "#" + tag;
+      document.getElementById("description").textContent =
+        `${matches.length} thing${matches.length === 1 ? "" : "s"} saved with this hashtag.`;
+      document.getElementById("meta").textContent = "";
+      document.getElementById("tags").innerHTML = "";
+      document.getElementById("link").classList.add("hidden");
+      document.getElementById("randomButton").classList.add("hidden");
+      document.getElementById("backButton").classList.remove("hidden");
+
+      const results = document.getElementById("results");
+      results.innerHTML = "";
+      results.classList.remove("hidden");
+
+      matches.forEach(item => {
+        const div = document.createElement("div");
+        div.className = "result";
+
+        const title = document.createElement("div");
+        title.className = "result-title";
+        title.textContent = item.title;
+
+        const description = document.createElement("div");
+        description.className = "result-description";
+        description.textContent = item.description;
+
+        const meta = document.createElement("div");
+        meta.className = "meta";
+        meta.textContent = `${item.category} · Added: ${item.dateAdded}`;
+
+        div.appendChild(title);
+        div.appendChild(description);
+        div.appendChild(meta);
+
+        if (item.url) {
+          const link = document.createElement("a");
+          link.className = "result-link";
+          link.href = item.url;
+          link.target = "_blank";
+          link.textContent = "Open Link";
+          div.appendChild(link);
+        }
+
+        results.appendChild(div);
+      });
     }
 
     showAnother();
