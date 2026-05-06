@@ -1,326 +1,254 @@
-<!doctype html>
-<html>
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Daily Conor</title>
-  <style>
-    body {
-      margin: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      background: #fafaf9;
-      color: #111;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      min-height: 100vh;
-      padding: 24px;
-    }
+"use client";
 
-    .card {
-      max-width: 760px;
-      width: 100%;
-      background: white;
-      border: 1px solid #e5e5e5;
-      border-radius: 28px;
-      padding: 48px;
-      box-shadow: 0 10px 30px rgba(0,0,0,.04);
-    }
+import { useMemo, useState } from "react";
 
-    .eyebrow {
-      color: #666;
-      font-size: 14px;
-      margin-bottom: 20px;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-    }
+const items = [
+  {
+    title: "Paradise on earth",
+    type: "Quotes",
+    source: "Conor",
+    added: "May 6, 2026",
+    quote:
+      "An old friend of mine, a journalist, once said that paradise on earth was to work all day alone in anticipation of an evening in interesting company.",
+    author: "Ian McEwan",
+    tags: ["work", "friendship", "life", "conversation"],
+  },
+  {
+    title: "Why do you go away?",
+    type: "Quotes",
+    source: "Conor",
+    added: "May 6, 2026",
+    quote:
+      "Why do you go away? So that you can come back. So that you can see the place you came from with new eyes and extra colors. And the people there see you differently, too. Coming back to where you started is not the same as never leaving.",
+    author: "Terry Pratchett",
+    tags: ["travel", "home", "life", "perspective"],
+  },
+  {
+    title: "a16z Infra Reading List",
+    type: "Reading",
+    added: "May 6, 2026",
+    description:
+      "Curated reading list from the a16z infra team—full of sci-fi, systems thinking, and intellectually interesting rabbit holes.",
+    url: "https://a16z.com/infra-reading-list/",
+    tags: ["reading", "technology", "systems", "ideas"],
+  },
+  {
+    title: "Richard Feynman",
+    type: "People",
+    added: "May 6, 2026",
+    description:
+      "Nobel Prize-winning physicist known for deep intuition, playful thinking, and unusually clear explanations of complex ideas.",
+    url: "https://en.wikipedia.org/wiki/Richard_Feynman",
+    tags: ["people", "science", "physics", "learning"],
+  },
+  {
+    title: "How to Run Meetings That Don’t Suck",
+    type: "Reading",
+    added: "May 6, 2026",
+    description:
+      "A practical essay on making meetings sharper, more useful, and less painful.",
+    url: "https://creatoreconomy.so/p/how-to-run-meetings-that-dont-suck",
+    tags: ["work", "meetings", "leadership", "productivity"],
+  },
+];
 
-    h1 {
-      font-size: 46px;
-      margin: 0 0 20px 0;
-      line-height: 1.1;
-      letter-spacing: -1px;
-    }
+function getRandomIndex(currentIndex, length) {
+  if (length <= 1) return 0;
 
-    .description {
-      color: #444;
-      line-height: 1.7;
-      font-size: 18px;
-      margin-bottom: 24px;
-      white-space: pre-wrap;
-    }
+  let nextIndex = Math.floor(Math.random() * length);
 
-    .meta {
-      color: #777;
-      font-size: 14px;
-      margin-bottom: 28px;
-      line-height: 1.6;
-    }
-
-    .tags {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-      margin-bottom: 28px;
-    }
-
-    .tag {
-      border: 1px solid #ddd;
-      border-radius: 999px;
-      padding: 8px 12px;
-      font-size: 13px;
-      color: #555;
-      background: #fafafa;
-      cursor: pointer;
-    }
-
-    .tag:hover {
-      background: #f0f0f0;
-    }
-
-    .button {
-      display: inline-block;
-      margin-right: 10px;
-      background: #111;
-      color: white;
-      padding: 14px 22px;
-      border-radius: 999px;
-      text-decoration: none;
-      font-weight: 600;
-      border: none;
-      cursor: pointer;
-      font-size: 16px;
-    }
-
-    .secondary {
-      background: white;
-      color: #111;
-      border: 1px solid #ccc;
-    }
-
-    .hidden {
-      display: none;
-    }
-
-    .result-list {
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-      margin-top: 24px;
-    }
-
-    .result {
-      border: 1px solid #e5e5e5;
-      border-radius: 18px;
-      padding: 20px;
-      background: #fafafa;
-    }
-
-    .result-title {
-      font-size: 20px;
-      font-weight: 700;
-      margin-bottom: 8px;
-    }
-
-    .result-description {
-      color: #555;
-      line-height: 1.6;
-      margin-bottom: 12px;
-    }
-
-    .result-link {
-      color: #111;
-      font-weight: 600;
-    }
-
-    @media (max-width: 700px) {
-      .card {
-        padding: 28px;
-      }
-
-      h1 {
-        font-size: 34px;
-      }
-
-      .button {
-        margin-top: 10px;
-      }
-    }
-  </style>
-</head>
-<body>
-  <div class="card">
-    <div class="eyebrow" id="eyebrow">Daily Conor</div>
-    <h1 id="title"></h1>
-    <div class="description" id="description"></div>
-    <div class="meta" id="meta"></div>
-    <div class="tags" id="tags"></div>
-
-    <a class="button" id="link" href="#" target="_blank">
-      Open Link
-    </a>
-
-    <button class="button secondary" id="randomButton" onclick="showAnother()">
-      Show me another
-    </button>
-
-    <button class="button secondary hidden" id="backButton" onclick="showAnother()">
-      Back to random
-    </button>
-
-    <div id="results" class="result-list hidden"></div>
-  </div>
-
-  <script>
-    const coolThings = [
-      {
-        title: "a16z Infra Reading List",
-        url: "https://a16z-infra.github.io/reading-list/",
-        category: "Reading",
-        tags: ["books", "technology", "infrastructure", "learning"],
-        description:
-          "Curated reading list from the a16z infra team—full of sci-fi, systems thinking, and intellectually interesting rabbit holes.",
-        source: "Conor",
-        dateAdded: "May 6, 2026"
-      },
-      {
-        title: "Richard Feynman",
-        url: "https://en.wikipedia.org/wiki/Richard_Feynman",
-        category: "People",
-        tags: ["physics", "curiosity", "learning", "scientist"],
-        description:
-          "Nobel Prize-winning physicist known for deep intuition, playful thinking, and unusually clear explanations of complex ideas.",
-        source: "Conor",
-        dateAdded: "May 6, 2026"
-      },
-      {
-        title: "Coming back to where you started",
-        category: "Quotes",
-        tags: ["perspective", "growth", "wisdom"],
-        description:
-`“Why do you go away? So that you can come back. So that you can see the place you came from with new eyes and extra colors. And the people there see you differently, too. Coming back to where you started is not the same as never leaving.”
-
-— Terry Pratchett`,
-        source: "Conor",
-        dateAdded: "May 6, 2026"
-      },
-      {
-        title: "Paradise on earth",
-        category: "Quotes",
-        tags: ["work", "friendship", "life", "conversation"],
-        description:
-`“An old friend of mine, a journalist, once said that paradise on earth was to work all day alone in anticipation of an evening in interesting company.”
-
-— Ian McEwan`,
-        source: "Conor",
-        dateAdded: "May 6, 2026"
-      },
-      {
-        title: "How to Run Meetings That Don't Suck",
-        url: "https://creatoreconomy.so/p/how-to-run-meetings-that-dont-suck",
-        category: "Writing",
-        tags: ["meetings", "leadership", "communication", "management"],
-        description:
-          "Practical thinking on how to make meetings more useful, efficient, and less draining.",
-        source: "Conor",
-        dateAdded: "May 6, 2026"
-      }
-    ];
-
-    function render(item) {
-  document.getElementById("eyebrow").textContent = "Daily Conor";
-  document.getElementById("title").textContent = item.title;
-  document.getElementById("description").textContent = item.description;
-  document.getElementById("meta").textContent =
-    `${item.category} · Source: ${item.source} · Added: ${item.dateAdded}`;
-
-  const results = document.getElementById("results");
-  results.classList.add("hidden");
-  results.innerHTML = "";
-
-  document.getElementById("backButton").classList.add("hidden");
-  document.getElementById("randomButton").classList.remove("hidden");
-
-  const linkButton = document.getElementById("link");
-  if (item.url) {
-    linkButton.href = item.url;
-    linkButton.classList.remove("hidden");
-  } else {
-    linkButton.classList.add("hidden");
+  while (nextIndex === currentIndex) {
+    nextIndex = Math.floor(Math.random() * length);
   }
 
-  renderTags(item.tags);
+  return nextIndex;
 }
 
-    function renderTags(tags) {
-      const tagsContainer = document.getElementById("tags");
-      tagsContainer.innerHTML = "";
+export default function Home() {
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [selectedTag, setSelectedTag] = useState(null);
 
-      tags.forEach(tag => {
-        const span = document.createElement("span");
-        span.className = "tag";
-        span.textContent = "#" + tag;
-        span.onclick = () => showTagResults(tag);
-        tagsContainer.appendChild(span);
-      });
-    }
+  const currentItem = items[currentIndex];
 
-    function showAnother() {
-      const item = coolThings[Math.floor(Math.random() * coolThings.length)];
-      render(item);
-    }
+  const taggedItems = useMemo(() => {
+    if (!selectedTag) return [];
+    return items.filter((item) => item.tags?.includes(selectedTag));
+  }, [selectedTag]);
 
-    function showTagResults(tag) {
-      const matches = coolThings.filter(item => item.tags.includes(tag));
+  function handleShowAnother() {
+    setSelectedTag(null);
+    setCurrentIndex((previousIndex) =>
+      getRandomIndex(previousIndex, items.length)
+    );
+  }
 
-      document.getElementById("eyebrow").textContent = "Daily Conor · Hashtag";
-      document.getElementById("title").textContent = "#" + tag;
-      document.getElementById("description").textContent =
-        `${matches.length} thing${matches.length === 1 ? "" : "s"} saved with this hashtag.`;
-      document.getElementById("meta").textContent = "";
-      document.getElementById("tags").innerHTML = "";
-      document.getElementById("link").classList.add("hidden");
-      document.getElementById("randomButton").classList.add("hidden");
-      document.getElementById("backButton").classList.remove("hidden");
+  function handleTagClick(tag) {
+    setSelectedTag(tag);
+  }
 
-      const results = document.getElementById("results");
-      results.innerHTML = "";
-      results.classList.remove("hidden");
+  function handleBack() {
+    setSelectedTag(null);
+  }
 
-      matches.forEach(item => {
-        const div = document.createElement("div");
-        div.className = "result";
+  return (
+    <main className="min-h-screen bg-[#f7f7f4] px-5 py-10 text-neutral-950">
+      <section className="mx-auto max-w-4xl rounded-[28px] border border-neutral-200 bg-white px-8 py-10 shadow-sm md:px-12">
+        {selectedTag ? (
+          <TagResultsView
+            selectedTag={selectedTag}
+            taggedItems={taggedItems}
+            onBack={handleBack}
+          />
+        ) : (
+          <SingleItemView
+            item={currentItem}
+            onShowAnother={handleShowAnother}
+            onTagClick={handleTagClick}
+          />
+        )}
+      </section>
+    </main>
+  );
+}
 
-        const title = document.createElement("div");
-        title.className = "result-title";
-        title.textContent = item.title;
+function SingleItemView({ item, onShowAnother, onTagClick }) {
+  return (
+    <>
+      <p className="mb-7 text-sm uppercase tracking-[0.2em] text-neutral-500">
+        Daily Conor
+      </p>
 
-        const description = document.createElement("div");
-        description.className = "result-description";
-        description.textContent = item.description;
+      <h1 className="mb-6 text-4xl font-black leading-tight tracking-tight md:text-5xl">
+        {item.title}
+      </h1>
 
-        const meta = document.createElement("div");
-        meta.className = "meta";
-        meta.textContent = `${item.category} · Added: ${item.dateAdded}`;
+      {item.quote && (
+        <blockquote className="mb-8 text-lg leading-8 text-neutral-800 md:text-xl md:leading-9">
+          “{item.quote}”
+        </blockquote>
+      )}
 
-        div.appendChild(title);
-        div.appendChild(description);
-        div.appendChild(meta);
+      {item.author && (
+        <p className="mb-8 text-lg text-neutral-800">— {item.author}</p>
+      )}
 
-        if (item.url) {
-          const link = document.createElement("a");
-          link.className = "result-link";
-          link.href = item.url;
-          link.target = "_blank";
-          link.textContent = "Open Link";
-          div.appendChild(link);
-        }
+      {item.description && (
+        <p className="mb-8 text-lg leading-8 text-neutral-700">
+          {item.description}
+        </p>
+      )}
 
-        results.appendChild(div);
-      });
-    }
+      <p className="mb-8 text-sm text-neutral-500">
+        {item.type}
+        {item.source ? ` · Source: ${item.source}` : ""}
+        {item.added ? ` · Added: ${item.added}` : ""}
+      </p>
 
-    showAnother();
-  </script>
-</body>
-</html>
+      {item.tags?.length > 0 && (
+        <div className="mb-8 flex flex-wrap gap-2">
+          {item.tags.map((tag) => (
+            <button
+              key={tag}
+              type="button"
+              onClick={() => onTagClick(tag)}
+              className="rounded-full border border-neutral-300 px-4 py-2 text-sm text-neutral-700 transition hover:bg-neutral-100"
+            >
+              #{tag}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {item.url && (
+        <a
+          href={item.url}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="mb-8 inline-block font-semibold underline underline-offset-4"
+        >
+          Open Link
+        </a>
+      )}
+
+      <div>
+        <button
+          type="button"
+          onClick={onShowAnother}
+          className="rounded-full border border-neutral-300 bg-white px-6 py-3 font-bold transition hover:bg-neutral-100"
+        >
+          Show me another
+        </button>
+      </div>
+    </>
+  );
+}
+
+function TagResultsView({ selectedTag, taggedItems, onBack }) {
+  return (
+    <>
+      <button
+        type="button"
+        onClick={onBack}
+        className="mb-8 rounded-full border border-neutral-300 bg-white px-5 py-2 text-sm font-semibold transition hover:bg-neutral-100"
+      >
+        ← Back
+      </button>
+
+      <p className="mb-3 text-sm uppercase tracking-[0.2em] text-neutral-500">
+        #{selectedTag}
+      </p>
+
+      <h1 className="mb-8 text-4xl font-black leading-tight tracking-tight md:text-5xl">
+        Things tagged #{selectedTag}
+      </h1>
+
+      {taggedItems.length === 0 ? (
+        <p className="text-neutral-600">No items found for this tag.</p>
+      ) : (
+        <div className="space-y-4">
+          {taggedItems.map((item) => (
+            <article
+              key={`${item.title}-${item.added}`}
+              className="rounded-3xl border border-neutral-200 bg-white p-6"
+            >
+              <h2 className="mb-3 text-xl font-black">{item.title}</h2>
+
+              {item.quote && (
+                <blockquote className="mb-4 leading-7 text-neutral-800">
+                  “{item.quote}”
+                </blockquote>
+              )}
+
+              {item.author && (
+                <p className="mb-4 text-neutral-700">— {item.author}</p>
+              )}
+
+              {item.description && (
+                <p className="mb-4 leading-7 text-neutral-700">
+                  {item.description}
+                </p>
+              )}
+
+              <p className="mb-4 text-sm text-neutral-500">
+                {item.type}
+                {item.source ? ` · Source: ${item.source}` : ""}
+                {item.added ? ` · Added: ${item.added}` : ""}
+              </p>
+
+              {item.url && (
+                <a
+                  href={item.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="font-semibold underline underline-offset-4"
+                >
+                  Open Link
+                </a>
+              )}
+            </article>
+          ))}
+        </div>
+      )}
+    </>
+  );
+}
